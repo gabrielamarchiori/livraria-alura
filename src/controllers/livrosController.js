@@ -1,10 +1,18 @@
-import { response } from "express";
 import livros from "../models/Livro.js";
 
 class LivroController {
     
     static listarLivros = async (req, res) => {
-        const response = await livros.find()
+
+        const editora = req.query.editora
+
+        if (editora) {
+            const response = await livros.find({'editora': editora})
+            return res.status(200).json(response)
+        }
+
+        const response = await livros.find().populate('autor')
+        
         return res.status(200).json(response)
     }
 
@@ -12,7 +20,7 @@ class LivroController {
         try {
             const id = req.params.id
 
-            const livroEncontrado = await livros.findById(id)
+            const livroEncontrado = await livros.findById(id).populate('autor', 'nome')
             res.status(200).json(livroEncontrado)
         }
         catch (err) {
@@ -56,10 +64,18 @@ class LivroController {
             res.status(204).json({});
         } catch (err) {
             console.error(err);
-            res.status(500).json({ error: `${err.message} - Falha ao atualizar livro` });
+            res.status(500).json({ error: `${err.message} - Falha ao deletar livro` });
         }
 
     }
+
+    // static livroPorEditora = async (req, res) => {
+    //     const editora = req.query.editora
+
+    //     const response = await livros.find({'editora': editora})
+
+    //     return res.status(200).json(response)
+    // }
 }
 
 export default LivroController
